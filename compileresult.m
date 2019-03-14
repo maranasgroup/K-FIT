@@ -2,13 +2,22 @@ function res = compileresult(xopt,model)
 
 
 % fmin
-[r,W,~,v,css] = rescalc(xopt,model);
+[r,W,J,v,css] = rescalc(xopt,model);
 res.fmin = r'*W*r;
+H = J'*W*J;
 
 % kinetic parameters and reversibilities
-[k,~,rev] = calc_k(model,xopt);
+[k,Jk,rev] = calc_k(model,xopt);
 
-kin = struct('id','','kf',[],'kr',[],'Ki',[],'kact',[]);
+% Uncertainties in kinetic parameter estimation
+H = (H+H')/2;
+s = svds(H,1);
+tol = max(size(H,1),size(Jk,1))*eps(s);
+Hinv = pinv(H,tol);
+Covmat = Jk*Hinv*Jk';
+k_sd = sqrt(abs(diag(Covmat)));
+
+kin = struct('id','','kf',[],'kr',[],'Ki',[],'kact',[],'kf_sd',[],'kr_sd',[],'Ki_sd',[],'kact_sd',[]);
 nr = length(model.rid);
 
 [res.kinetic_params(1:nr)] = deal(kin);
@@ -27,11 +36,17 @@ for i = 1:nr
     krevind = 2*eind;
     kfwdind = krevind-1;
     krxn = k(model.p.kblocks(i)+1:model.p.kblocks(i+1));
+    k_sd_rxn = k_sd(model.p.kblocks(i)+1:model.p.kblocks(i+1));
     kcatal = krxn(1:2*ne(i));
+    k_sd_catal = k_sd_rxn(1:2*ne(i));
     res.kinetic_params(i).kr = kcatal(krevind);
+    res.kinetic_params(i).kr_sd = k_sd_catal(krevind);
     res.kinetic_params(i).kf = kcatal(kfwdind);
+    res.kinetic_params(i).kf_sd = k_sd_catal(kfwdind);
     krxn(1:2*ne(i)) = [];
+    k_sd_rxn(1:2*ne(i)) = [];
     res.kinetic_params(i).Ki = krxn;
+    res.kinetic_params(i).Ki_sd = k_sd_rxn;
 end
 
 % Predicted fluxes and concentrations
@@ -143,6 +158,7 @@ res.residuals.fluxes = flxs;
 
 %reinitialization
 res.reinit_data = xopt;
+res.xbest_sd = sqrt(abs(diag(Hinv)));
 
 
 

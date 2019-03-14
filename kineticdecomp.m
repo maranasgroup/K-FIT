@@ -109,7 +109,8 @@ for i = 1:nr
     r.act = actv;
     ns = length(subs);
     np = length(pdt);
-    nact = length(actv);
+    
+     = length(actv);
     nci = length(in_c);
     nuci = length(in_uc);
     nnci = length(in_nc);
@@ -196,7 +197,7 @@ for i = 1:nr
             if nact > 0
                 Se(1,end+1) = 1;
                 Se(end+1,end) = -1;
-                Se(:,end+1) = Se(:,end);
+                Se(:,end+1) = Se(:,end); % should this not be negative of Se(:,end)?
                 ne = ne+1;
                 nk = nk+2*nact;
                 dkadc = sparse(nm,2*nact);
