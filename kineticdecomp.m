@@ -110,7 +110,7 @@ for i = 1:nr
     ns = length(subs);
     np = length(pdt);
     
-     = length(actv);
+    nact = length(actv);
     nci = length(in_c);
     nuci = length(in_uc);
     nnci = length(in_nc);
