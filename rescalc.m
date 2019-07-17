@@ -2,7 +2,7 @@ function [r,W,J,vop,cs] = rescalc(x,model)
 %UNTITLED Summary of this function goes here
 %   Detailed explanation goes here
 ncond = length(model.d.vpert(1,:));
-cind = 69;
+cind = 14;
 nr = length(model.p.dEdk);
 v = zeros(nr,ncond);
 sthresh = 1e-4;
@@ -83,7 +83,7 @@ for i = 1:ncond
     dvdk{i} = dvxdk;
 end
 %}
-parfor i = 1:ncond
+for i = 1:ncond
     done = false;
     c0 = ones(1,nm);
     ctr = 0;
